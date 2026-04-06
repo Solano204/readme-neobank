@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeoBank — Project Documentation | Full AWS Banking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --page: #f5f3ee;
+    --cream: #ede9e0;
+    --accent: #1a56db;
+    --accent-dim: #2563eb22;
+    --gold: #c8963e;
+    --gold-dim: #c8963e18;
+    --green: #0d7a4e;
+    --green-dim: #0d7a4e18;
+    --red: #c0392b;
+    --muted: #6b6b78;
+    --border: #d8d4cb;
+    --rule: #0a0a0f12;
+    --card: #ffffff;
+    --code-bg: #1a1a24;
+    --code-text: #c8f0c8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: var(--ink);
+    color: var(--page);
+    padding: 80px 60px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, #1a56db18, transparent),
+                radial-gradient(ellipse 50% 80% at 20% 80%, #c8963e0d, transparent);
+  }
+  .cover-inner { position: relative; max-width: 900px; }
+  .cover-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-tag::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+  h1 span { color: var(--gold); }
+  .cover-sub {
+    font-size: 18px;
+    font-weight: 300;
+    color: #a8a8b4;
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .badge-blue   { background: #1a56db22; color: #6ba3ff; border: 1px solid #1a56db44; }
+  .badge-gold   { background: #c8963e22; color: #f0b74e; border: 1px solid #c8963e44; }
+  .badge-green  { background: #0d7a4e22; color: #4ad6a0; border: 1px solid #0d7a4e44; }
+  .badge-purple { background: #7c3aed22; color: #c084fc; border: 1px solid #7c3aed44; }
+  .badge-red    { background: #c0392b22; color: #f08080; border: 1px solid #c0392b44; }
+
+  /* ── NAV ── */
+  .toc-bar {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .toc-bar a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 16px 18px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .toc-bar a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .page-wrap { max-width: 960px; margin: 0 auto; padding: 0 60px 80px; }
+
+  /* ── SECTION HEADS ── */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin: 70px 0 32px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+  .section-head h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 36px 0 14px;
+    letter-spacing: -0.01em;
+  }
+
+  p { margin-bottom: 14px; color: #2a2a34; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ── GRID ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  @media (max-width: 700px) {
+    .page-wrap { padding: 0 24px 60px; }
+    .cover { padding: 48px 24px; }
+    .toc-bar { padding: 0 24px; }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── CODE ── */
+  pre, code {
+    font-family: 'DM Mono', monospace;
+  }
+  code {
+    background: #e8e4db;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #b05a2f;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 20px 24px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 14px 0 22px;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  .comment { color: #6a9fb5; }
+  .kw { color: #cc99cd; }
+  .str { color: #7ec699; }
+  .fn { color: #f0c674; }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin: 14px 0 22px;
+  }
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--page);
+    padding: 10px 14px;
+    text-align: left;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f9f7f3; }
+  td code { font-size: 12px; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    background: var(--code-bg);
+    color: #c8d8f0;
+    border-radius: 10px;
+    padding: 28px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 2.0;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .flow .arrow { color: #6ba3ff; }
+  .flow .box { color: var(--code-text); }
+  .flow .parallel { color: #f0c674; }
+  .flow .dim { color: #5a6a7a; }
+
+  /* ── STATUS ── */
+  .status-ok  { color: var(--green); font-weight: 600; }
+  .status-info { color: var(--accent); }
+
+  /* ── PILL ── */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .pill-java   { background: #ff890022; color: #f08030; }
+  .pill-python { background: #3c78d822; color: #6ba3ff; }
+  .pill-sqs    { background: #c8963e22; color: #d4a853; }
+  .pill-s3     { background: #0d7a4e22; color: #4ad6a0; }
+  .pill-api    { background: #7c3aed22; color: #c084fc; }
+  .pill-http   { background: #c0392b22; color: #f08080; }
+
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--rule); margin: 32px 0; }
+
+  /* ── ENDPOINT LIST ── */
+  .endpoint {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  .method {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 3px;
+    min-width: 46px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .method-get  { background: #0d7a4e22; color: #0d7a4e; border: 1px solid #0d7a4e44; }
+  .method-post { background: #1a56db22; color: #1a56db; border: 1px solid #1a56db44; }
+  .method-put  { background: #c8963e22; color: #9b6e24; border: 1px solid #c8963e44; }
+  .method-del  { background: #c0392b22; color: #c0392b; border: 1px solid #c0392b44; }
+  .endpoint-path { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); flex: 1; }
+  .endpoint-desc { color: var(--muted); font-size: 12.5px; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+  .callout.gold {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+  }
+
+  /* ── LAMBDA CARD ── */
+  .lambda-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .lambda-head {
+    background: var(--ink);
+    color: var(--page);
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .lambda-head h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .lambda-body { padding: 20px 22px; }
+  .lambda-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .meta-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ── PROOF GALLERY (images only, no description) ── */
+  .proof-section {
+    background: var(--surface2);
+    margin-top: 50px;
+    padding: 28px 0;
+  }
+  .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+  .proof-img {
+    width: 100%;
+    background: #0a0a0f;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+  }
+  .proof-img:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+  .proof-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+  }
+  .proof-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    padding: 12px 14px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    text-align: center;
+    font-weight: 400;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--ink);
+    color: #4a4a58;
+    padding: 40px 60px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .footer-brand {
+    color: var(--page);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── STEP LIST ── */
+  ol.steps { padding-left: 0; list-style: none; counter-reset: steps; }
+  ol.steps li {
+    counter-increment: steps;
+    padding: 12px 14px 12px 50px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  ol.steps li::before {
+    content: counter(steps, decimal-leading-zero);
+    position: absolute;
+    left: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    top: 15px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ COVER ══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-tag">Full-Stack Cloud Banking System</div>
+    <h1>Neo<span>Bank</span><br>Backend</h1>
+    <p class="cover-sub">A production-grade digital banking platform built on AWS — from Spring Boot REST API to serverless Lambda microservices, AI-powered KYC verification, and real-time fraud detection.</p>
+    <div class="badges">
+      <span class="badge badge-blue">☕ Java 21 + Spring Boot 3</span>
+      <span class="badge badge-gold">☁ AWS EC2 + Lambda</span>
+      <span class="badge badge-green">🐘 PostgreSQL RDS</span>
+      <span class="badge badge-purple">⚡ DynamoDB + SQS</span>
+      <span class="badge badge-red">🔐 Cognito + JWT</span>
+      <span class="badge badge-blue">🤖 Rekognition AI</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════════ -->
+<nav class="toc-bar">
+  <a href="#overview">Overview</a>
+  <a href="#infrastructure">Infrastructure</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#flows">Core Flows</a>
+  <a href="#api">API</a>
+  <a href="#lambdas">Lambdas</a>
+  <a href="#database">Database</a>
+  <a href="#security">Security</a>
+  <a href="#tech">Technologies</a>
+  <a href="#proof">Proof</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- ══ 01 OVERVIEW ══════════════════════════════════════════════════ -->
+<div class="section-head" id="overview">
+  <span class="section-num">01</span>
+  <h2>Project Overview</h2>
+</div>
+
+<p>NeoBank is a fully deployed, cloud-native digital banking backend built from scratch on AWS. The system enables users to create accounts, undergo AI-powered identity verification, transfer money in real time, and receive instant notifications — all backed by a secure, scalable serverless architecture.</p>
+
+<p>The project is split into two main components: a monolithic <strong>Spring Boot application</strong> running on EC2 that handles authentication, user management, accounts, and KYC flows; and a suite of <strong>8 specialized AWS Lambda functions</strong> that process transactions, detect fraud, write to the ledger, send notifications, and power an AI chatbot — all triggered by events rather than direct calls.</p>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-title" style="color:var(--accent)">Spring Boot Backend</div>
+    <p style="margin:0;font-size:14px;">30+ REST endpoints covering authentication, user profiles, account management, and KYC document verification — deployed as a systemd service on an AWS EC2 t3.micro running Amazon Linux 2023.</p>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--gold)">Lambda Microservices</div>
+    <p style="margin:0;font-size:14px;">8 independently deployable Lambda functions triggered by SQS queues, S3 events, and API Gateway HTTP calls — processing every transaction through fraud detection, ledger writing, analytics, and notifications in parallel.</p>
+  </div>
+</div>
+
+<!-- ══ 02 INFRASTRUCTURE ══════════════════════════════════════════ -->
+<div class="section-head" id="infrastructure">
+  <span class="section-num">02</span>
+  <h2>AWS Infrastructure</h2>
+</div>
+
+<p>Every resource in this project runs on AWS. Below is the complete map of every deployed service and what it is used for.</p>
+
+<table>
+  <thead>
+    <tr><th>AWS Service</th><th>Resource Name</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>EC2 t3.micro</code></td><td>98.93.153.87</td><td>Spring Boot application server (systemd service)</td></tr>
+    <tr><td><code>RDS PostgreSQL 15</code></td><td>neobank-db</td><td>Primary relational database — users, accounts, KYC</td></tr>
+    <tr><td><code>Cognito User Pool</code></td><td>neobank-mobile-app</td><td>User identity, JWT token issuance</td></tr>
+    <tr><td><code>S3 Bucket</code></td><td>neobank-kyc-dev-carlos</td><td>KYC document storage (selfies, ID photos)</td></tr>
+    <tr><td><code>SQS Queue</code></td><td>neobank-transactions</td><td>Transaction events fan-out to 4 Lambdas</td></tr>
+    <tr><td><code>DynamoDB</code></td><td>transactions</td><td>Immutable transaction ledger + fraud scores</td></tr>
+    <tr><td><code>API Gateway</code></td><td>neobank-transaction-api</td><td>HTTP entrypoint for Lambda transaction endpoints</td></tr>
+    <tr><td><code>Rekognition</code></td><td>—</td><td>AI face analysis for KYC verification</td></tr>
+    <tr><td><code>SNS + SES</code></td><td>fraud-alerts, kyc-notifications</td><td>Email & alert delivery</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ══ 03 ARCHITECTURE ══════════════════════════════════════════════ -->
+<div class="section-head" id="architecture">
+  <span class="section-num">03</span>
+  <h2>System Architecture</h2>
+</div>
+
+<div class="flow">
+<span class="dim">╔════════════════════════════════════════════════════════════════╗</span>
+<span class="dim">║                      MOBILE APP / FRONTEND                     ║</span>
+<span class="dim">╚══════════════╦═════════════════════════════════╦═══════════════╝</span>
+               <span class="arrow">↓</span>                                <span class="arrow">↓</span>
+  <span class="dim">┌─────────────────────────┐  ┌───────────────────────────────┐</span>
+  <span class="box">│   AWS API Gateway       │  │   AWS API Gateway             │</span>
+  <span class="box">│   (EC2 proxy routes)    │  │   /prod/transactions          │</span>
+  <span class="dim">└──────────┬──────────────┘  └──────┬────────────┬────────────┘</span>
+             <span class="arrow">↓</span>                      <span class="arrow">↓</span>            <span class="arrow">↓</span>
+  <span class="dim">┌──────────────────────┐   ┌────────────┐ ┌────────────────────┐</span>
+  <span class="box">│  Spring Boot (EC2)   │   <span class="parallel">│transaction-│</span> <span class="parallel">│transaction-query   │</span></span>
+  <span class="box">│  :8080               │   <span class="parallel">│service λ   │</span> <span class="parallel">│Lambda (GET)        │</span></span>
+  <span class="dim">└────────┬─────────────┘   └──────┬─────┘ └────────────────────┘</span>
+           <span class="arrow">↓</span>                      <span class="arrow">↓</span>
+  <span class="dim">┌──────────────────────┐   ┌────────────────────────────────────┐</span>
+  <span class="box">│  PostgreSQL RDS       │   │  SQS Queue: neobank-transactions   │</span>
+  <span class="box">│  users, accounts,     │   └────┬──────────┬───────┬────────────┘</span>
+  <span class="box">│  kyc_docs             │        <span class="arrow">↓</span>          <span class="arrow">↓</span>       <span class="arrow">↓</span>       <span class="arrow">↓</span></span>
+  <span class="dim">└──────────────────────┘  ┌──────┐ ┌──────┐ ┌──────┐ ┌────────┐</span>
+                            <span class="parallel">│fraud │</span> <span class="parallel">│ledger│</span> <span class="parallel">│notify│</span> <span class="parallel">│analyt-│</span>
+                            <span class="parallel">│check.│</span> <span class="parallel">│writer│</span> <span class="parallel">│svc   │</span> <span class="parallel">│ics    │</span>
+                            <span class="dim">└──────┘ └──────┘ └──────┘ └────────┘</span>
+                               <span class="arrow">↓</span>        <span class="arrow">↓</span>       <span class="arrow">↓</span>        <span class="arrow">↓</span>
+                            <span class="box">DynamoDB DynamoDB SNS     CloudWatch</span>
+</div>
+
+
+<!-- ══ 04 CORE FLOWS ══════════════════════════════════════════════ -->
+<div class="section-head" id="flows">
+  <span class="section-num">04</span>
+  <h2>Core Application Flows</h2>
+</div>
+
+<h3>Money Transfer (ACID Transaction)</h3>
+<ol class="steps">
+  <li>Mobile app sends <code>POST /prod/transactions</code> with from_account, to_account, amount</li>
+  <li>API Gateway routes to <strong>transaction-service Lambda</strong></li>
+  <li>PostgreSQL: <code>SELECT FOR UPDATE</code> locks sender's row — prevents race conditions</li>
+  <li>Balance check → if insufficient funds, ROLLBACK and return error</li>
+  <li>PostgreSQL: deduct from sender, add to receiver, COMMIT</li>
+  <li>Event published to SQS queue → triggers fraud-checker, ledger-writer, notification-service, analytics-processor in parallel</li>
+</ol>
+
+
+<!-- ══ 05 API ══════════════════════════════════════════════════════ -->
+<div class="section-head" id="api">
+  <span class="section-num">05</span>
+  <h2>REST API Reference</h2>
+</div>
+
+<div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/auth/signup</span><span class="endpoint-desc">Register new user — creates user, account, and default settings atomically</span></div>
+<div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/api/auth/login</span><span class="endpoint-desc">Authenticate and return JWT access + refresh tokens</span></div>
+<div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/users/profile</span><span class="endpoint-desc">Full user profile including KYC status</span></div>
+<div class="endpoint"><span class="method method-post">POST</span><span class="endpoint-path">/prod/transactions</span><span class="endpoint-desc">Execute money transfer with row-level locking</span></div>
+<div class="endpoint"><span class="method method-get">GET</span><span class="endpoint-path">/api/kyc/upload-url</span><span class="endpoint-desc">Generate pre-signed S3 URL for direct upload</span></div>
+
+
+<!-- ══ 06 LAMBDAS ══════════════════════════════════════════════════ -->
+<div class="section-head" id="lambdas">
+  <span class="section-num">06</span>
+  <h2>Lambda Functions</h2>
+</div>
+
+<div class="lambda-card">
+  <div class="lambda-head"><h4>transaction-service</h4><span class="pill pill-api">API Gateway POST</span></div>
+  <div class="lambda-body"><p><strong>Role:</strong> Financial core. Handles every transfer with PostgreSQL row locking and ACID transactions.</p></div>
+</div>
+<div class="lambda-card">
+  <div class="lambda-head"><h4>fraud-checker</h4><span class="pill pill-sqs">SQS Trigger</span></div>
+  <div class="lambda-body"><p><strong>Role:</strong> Real-time fraud detection using risk scoring (amount, time, weekend, round numbers). Scores >0.75 trigger alerts.</p></div>
+</div>
+<div class="lambda-card">
+  <div class="lambda-head"><h4>ledger-writer</h4><span class="pill pill-sqs">SQS Trigger</span></div>
+  <div class="lambda-body"><p><strong>Role:</strong> Immutable transaction ledger to DynamoDB.</p></div>
+</div>
+<div class="lambda-card">
+  <div class="lambda-head"><h4>kyc-validator</h4><span class="pill pill-s3">S3 Event Trigger</span></div>
+  <div class="lambda-body"><p><strong>Role:</strong> AI identity verification with Rekognition, updates PostgreSQL, sends SNS notification.</p></div>
+</div>
+
+
+<!-- ══ 07 DATABASE ══════════════════════════════════════════════════ -->
+<div class="section-head" id="database">
+  <span class="section-num">07</span>
+  <h2>Database Design</h2>
+</div>
+
+<p><strong>PostgreSQL RDS:</strong> users, accounts, user_sessions, kyc_documents, contacts, user_settings — all ACID-compliant.</p>
+<p><strong>DynamoDB:</strong> transactions table with GSI <code>from_account-timestamp-index</code> for fast account history queries.</p>
+
+
+<!-- ══ 08 SECURITY ══════════════════════════════════════════════════ -->
+<div class="section-head" id="security">
+  <span class="section-num">08</span>
+  <h2>Security Design</h2>
+</div>
+
+<p>Passwords stored in Cognito (never in PostgreSQL). JWT validation via Spring Security filter. <code>SELECT FOR UPDATE</code> row locking prevents double-spending. Freeze requires password re-verification. Secrets injected via systemd EnvironmentFile.</p>
+
+<div class="callout">
+  <strong>Security Note:</strong> IAM least-privilege roles. No secrets in source code. Cognito brute-force protection (5 attempts → 15min lockout).
+</div>
+
+
+<!-- ══ 09 TECHNOLOGIES ══════════════════════════════════════════════ -->
+<div class="section-head" id="tech">
+  <span class="section-num">09</span>
+  <h2>Technology Stack</h2>
+</div>
+
+<div class="grid2">
+  <div>
+    <h3>Backend Core</h3>
+    <p>Spring Boot 3.2 · Java 21 · HikariCP · Flyway · MapStruct · JJWT · Lombok</p>
+  </div>
+  <div>
+    <h3>AWS Services</h3>
+    <p>EC2 · RDS PostgreSQL · Lambda · API Gateway · SQS · DynamoDB · Cognito · Rekognition · S3 · SNS/SES</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ══ 10 PROOF IMAGES (ONLY IMAGES, NO DESCRIPTIONS) ═══════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-head" id="proof">
+  <span class="section-num">10</span>
+  <h2>Implementation Proof</h2>
+</div>
+
+<div class="proof-grid">
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20162805.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20162851.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20162906.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20163022.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20163041.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20163053.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20163109.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-03-08%20163136.png" alt="proof" loading="lazy"></div>
+  <div class="proof-img"><img src="https://chicfkbdfqdrrevtrrby.supabase.co/storage/v1/object/public/PROJIECT%20GITHUB/Captura%20de%20pantalla%202026-04-05%20151310.png" alt="proof" loading="lazy"></div>
+</div>
+
+<div class="callout gold" style="margin-top:32px;">
+  <strong>Project Status:</strong> All 8 Lambda functions are deployed and tested on AWS. All Spring Boot endpoints are verified. End-to-end flows operational in <code>us-east-1</code>.
+</div>
+
+</div><!-- /page-wrap -->
+
+<div class="footer">
+  <div class="footer-brand">NeoBank Backend — AWS Cloud Banking System</div>
+  <div>us-east-1 · EC2 + Lambda + RDS + DynamoDB · Java 21 + Python 3.11</div>
+</div>
+
+</body>
+</html>
